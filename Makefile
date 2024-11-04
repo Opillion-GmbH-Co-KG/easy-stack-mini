@@ -59,7 +59,7 @@ start-callback: \
 	docker-login \
 	build
 	$(OUTPUT)$(DOCKER_COMPOSE) up -d --force-recreate
-	$(OUTPUT)printf $(COLOR_GREEN)
+	$(OUTPUT)printf $(COLOR_GREEN)"\n\n"
 	$(OUTPUT)bash -c "tail -500 README.makefile.md"
 	$(OUTPUT)printf $(COLOR_OFF)
 	$(OUTPUT)printf $(COLOR_GREEN)"\n Docker containers built and started! \n\n"$(COLOR_OFF)
