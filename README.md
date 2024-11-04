@@ -62,7 +62,7 @@ DOCKER_REPO_NAME=<your repo / username>
 
 ![Alt text](.makefile/assets/github-secrets-needed.png?raw=true" "Github secrets")
 
-#### Let github build your images
+#### Let Github build your images for you
 ![Alt text](.makefile/assets/github-build-docker-container.png?raw=true" "Github building Docker container")
 
 #### You don't need this, just use your local dev and not the precompiled Image change:
