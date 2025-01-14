@@ -1,0 +1,25 @@
+services:
+
+  alpine:
+    hostname: alpine
+    image: ${DOCKER_REPO}/alpine:${PROD_IMAGE_TAG}
+    secrets:
+      - secret_APP_SECRET
+    environment:
+      APP_SECRET_FILE: /run/secrets/secret_APP_SECRET
+    networks:
+      - default
+
+
+
+
+secrets:
+  secret_APP_SECRET:
+    external: true
+
+networks:
+  default:
+    name: ${DOCKER_NETWORK}
+    driver: overlay
+    attachable: true
+

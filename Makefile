@@ -4,6 +4,7 @@ export
 
 include ./.makefile/Makefile.color
 include ./.makefile/Makefile.function
+include ./.makefile/Makefile.swarm
 
 .DEFAULT_GOAL := help
 OUTPUT := @
@@ -71,13 +72,28 @@ restart-callback: \
 build-%-callback:
 	$(call buildx-build, $*)
 
+docker-hub-pull: \
+	docker-login
+	$(OUTPUT)printf $(COLOR_BLUE)"\nPulling all images from DOCKER_CONTAINER: $(DOCKER_CONTAINER)\n"$(COLOR_OFF)
+	@for container in $(shell echo $(DOCKER_CONTAINER) | tr ',' ' '); do \
+		printf $(COLOR_GREEN)"Pulling image: $(DOCKER_IO)/$$container:$(PROD_IMAGE_TAG)...\n"$(COLOR_OFF); \
+		if docker pull --tls-verify=false $(DOCKER_IO)/$$container:$(PROD_IMAGE_TAG); then \
+			printf $(COLOR_GREEN)"Successfully pulled: $(DOCKER_IO)/$$container:$(PROD_IMAGE_TAG)\n"$(COLOR_OFF); \
+		else \
+			printf $(COLOR_RED)"Failed to pull: $(DOCKER_IO)/$$container:$(PROD_IMAGE_TAG)\n"$(COLOR_OFF); \
+		fi; \
+	done
+	$(OUTPUT)printf $(COLOR_GREEN)"\nAll images processed.\n"$(COLOR_OFF)
+
+
 logo-callback:
 	APP_NAME=$(APP_NAME)
 	$(OUTPUT)printf $(COLOR_BLUE)
 	$(OUTPUT)awk '{printf "%10s%s\n", "", $$0}' .makefile/assets/easy-stack-mini.asci
+	$(OUTPUT)printf $(COLOR_WHITE)
+	echo  '                                                             '
+	echo  "                          $$APP_NAME                         "
 	$(OUTPUT)printf $(COLOR_BLUE)
 	echo  '                                                             '
-	echo  "                       $$APP_NAME                        "
-	echo  '                                                             '
-	echo  '                 Opillion GmbH & Co KG (GPL-3.0 2024)        '
+	echo  '                Opillion GmbH & Co KG (GPL-3.0 2024)         '
 	$(OUTPUT)printf $(COLOR_OFF)"\n\n"

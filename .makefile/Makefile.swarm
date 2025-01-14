@@ -1,0 +1,112 @@
+.PHONY: \
+  images-list \
+  images-pull \
+  kill-docker-proxy \
+  list-nodes \
+  list-stacks \
+  swarm \
+  swarm-clean-secrets \
+  swarm-init \
+  swarm-join \
+  swarm-ps \
+  swarm-running \
+  swarm-secrets \
+  swarm-services \
+  swarm-show \
+  push-images \
+  proxy \
+  deploy \
+  swarm-stop \
+  crass-login \
+  docker-io-login
+
+
+images-list:
+	$(OUTPUT)docker images
+
+kill-docker-proxy:
+	sudo killall docker-proxy
+
+list-nodes:
+	$(OUTPUT)docker node ls
+
+list-stacks:
+	$(OUTPUT)docker stack ls
+
+
+swarm: \
+	swarm-stop
+	# images-pull
+	$(OUTPUT)printf $(COLOR_BLUE)"\nInitializing Docker Swarm...\n"$(COLOR_OFF)
+	@if docker swarm init 2>/dev/null; then \
+		printf $(COLOR_GREEN)"Swarm initialized successfully.\n"$(COLOR_OFF); \
+	else \
+		printf $(COLOR_YELLOW)"Swarm already initialized.\n"$(COLOR_OFF); \
+	fi; \
+	SWARM_TOKEN=$$(docker swarm join-token -q worker); \
+	SWARM_IP=$$(hostname -I | awk '{print $$1}'); \
+	SWARM_PORT=2377; \
+	export SWARM_TOKEN SWARM_IP SWARM_PORT; \
+	printf $(COLOR_GREEN)"Swarm join token exported as SWARM_TOKEN: $$SWARM_TOKEN\n"$(COLOR_OFF); \
+	printf $(COLOR_GREEN)"Swarm leader IP exported as SWARM_IP: $$SWARM_IP\n"$(COLOR_OFF); \
+	printf $(COLOR_GREEN)"Swarm leader Port exported as SWARM_PORT: $$SWARM_PORT\n"$(COLOR_OFF);
+	$(OUTPUT)printf $(COLOR_BLUE)"\nInitializing envs...\n"$(COLOR_OFF)
+	$(OUTPUT).docker/.build/create-secrets.sh
+	$(OUTPUT)printf $(COLOR_GREEN)"\nDeploying stack with name: $(APP_NAME)...\n"$(COLOR_OFF)
+	$(OUTPUT)printf $(COLOR_GREEN)
+	$(OUTPUT)docker stack deploy -c docker-compose.swarm.yml --detach=true $(APP_NAME)
+	$(OUTPUT)printf $(COLOR_OFF)
+	$(OUTPUT)printf $(COLOR_WHITE)"\nDocker Swarm Stack '$(APP_NAME)' successfully started.\n"$(COLOR_OFF)
+	$(OUTPUT)make swarm-show
+
+swarm-clean-secrets:
+	$(OUTPUT)printf $(COLOR_YELLOW)"\nCleaning up all existing Docker secrets...\n"$(COLOR_OFF)
+	@if docker secret ls -q | xargs -r docker secret rm > /dev/null 2>&1; then \
+		printf $(COLOR_GREEN)"All Docker secrets have been removed.\n"$(COLOR_OFF); \
+	else \
+		printf $(COLOR_YELLOW)"No Docker secrets found to remove.\n"$(COLOR_OFF); \
+	fi
+
+swarm-init:
+	$(OUTPUT)docker swarm init
+
+swarm-join:
+	$(OUTPUT)docker swarm join --token $(SWARM_TOKEN) $(ip):$(port)
+
+swarm-ps:
+	$(OUTPUT)docker stack ps $(APP_NAME)
+
+swarm-running:
+	$(OUTPUT)docker stack ps $(APP_NAME) | grep Running
+
+swarm-secrets:
+	$(OUTPUT)docker secret ls
+
+swarm-services:
+	$(OUTPUT)docker service ls
+
+swarm-show:
+	$(OUTPUT)printf $(COLOR_BLUE)
+	$(OUTPUT)docker node ls
+	$(OUTPUT)printf $(COLOR_OFF)$(COLOR_WHITE)
+	$(OUTPUT)docker stack services $(APP_NAME)
+	$(OUTPUT)printf $(COLOR_OFF)
+	# $(OUTPUT)make swarm-ps
+	# $(OUTPUT)make secrets
+
+COUNTDOWN := 20 # sec
+swarm-stop:
+	$(OUTPUT)printf $(COLOR_RED)"\nRemoving Docker Swarm Stack: $(APP_NAME)...\n"$(COLOR_OFF)
+	@if docker stack rm $(APP_NAME) > /dev/null 2>&1; then \
+		printf $(COLOR_YELLOW)"Docker Swarm Stack '$(APP_NAME)' removal initiated.\n"$(COLOR_OFF); \
+	else \
+		printf $(COLOR_GREEN)"Docker Swarm Stack '$(APP_NAME)' does not exist or is already removed.\n"$(COLOR_OFF); \
+	fi
+	$(OUTPUT)printf $(COLOR_WHITE)"\nWaiting for Docker Swarm Stack '$(APP_NAME)' to be fully stopped...\n"$(COLOR_OFF)
+	@for i in $$(seq $(COUNTDOWN) -1 1); do \
+		printf "\rStopping '$(APP_NAME)': $$i seconds remaining"; \
+		sleep 1; \
+	done
+	@printf "\n"$(COLOR_GREEN)"Docker Swarm Stack '$(APP_NAME)' successfully stopped.\n"$(COLOR_OFF)
+	$(OUTPUT)make swarm-clean-secrets
+
