@@ -19,6 +19,8 @@
   crass-login \
   docker-io-login
 
+logo:
+	$(call measure_time, list-nodes)
 
 kill-docker-proxy:
 	sudo killall docker-proxy
@@ -54,6 +56,7 @@ swarm: \
 	$(OUTPUT)printf $(COLOR_OFF)
 	$(OUTPUT)printf $(COLOR_WHITE)"\nDocker Swarm Stack '$(APP_NAME)' successfully started.\n"$(COLOR_OFF)
 	$(OUTPUT)make swarm-show
+	$(OUTPUT)make logo
 
 swarm-clean-secrets:
 	$(OUTPUT)printf $(COLOR_YELLOW)"\nCleaning up all existing Docker secrets...\n"$(COLOR_OFF)
