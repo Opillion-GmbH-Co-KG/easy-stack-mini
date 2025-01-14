@@ -9,9 +9,11 @@ services:
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
     networks:
-      - easy-stack-network
+      - default
 
 networks:
-  easy-stack-network:
-    name: easy-stack-network
+  default:
+    name: ${DOCKER_NETWORK}
     driver: bridge
+
+

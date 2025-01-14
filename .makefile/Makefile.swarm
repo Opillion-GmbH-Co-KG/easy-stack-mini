@@ -91,10 +91,9 @@ swarm-show:
 	$(OUTPUT)printf $(COLOR_OFF)$(COLOR_WHITE)
 	$(OUTPUT)docker stack services $(APP_NAME)
 	$(OUTPUT)printf $(COLOR_OFF)
-	# $(OUTPUT)make swarm-ps
-	# $(OUTPUT)make secrets
 
-COUNTDOWN := 20 # sec
+
+COUNTDOWN := 5 # sec
 swarm-stop:
 	$(OUTPUT)printf $(COLOR_RED)"\nRemoving Docker Swarm Stack: $(APP_NAME)...\n"$(COLOR_OFF)
 	@if docker stack rm $(APP_NAME) > /dev/null 2>&1; then \
