@@ -90,7 +90,7 @@ docker-pull-images: \
 logo-callback:
 	APP_NAME=$(APP_NAME)
 	$(OUTPUT)printf $(COLOR_BLUE)
-	$(OUTPUT)awk '{printf "%10s%s\n", "", $$0}' .makefile/assets/easy-stack-mini.asci
+	$(OUTPUT)awk '{printf "%10s%s\n", "", $$0}' .makefile/assets/logo.asci
 	$(OUTPUT)printf $(COLOR_WHITE)
 	echo  '                                                             '
 	echo  "                          $$APP_NAME                         "
