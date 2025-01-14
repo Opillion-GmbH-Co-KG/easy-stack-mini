@@ -1,5 +1,4 @@
 .PHONY: \
-  images-list \
   images-pull \
   kill-docker-proxy \
   list-nodes \
@@ -20,9 +19,6 @@
   crass-login \
   docker-io-login
 
-
-images-list:
-	$(OUTPUT)docker images
 
 kill-docker-proxy:
 	sudo killall docker-proxy
