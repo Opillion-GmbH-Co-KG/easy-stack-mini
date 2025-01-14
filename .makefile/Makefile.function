@@ -13,7 +13,7 @@ define buildx-build
 	$(OUTPUT)printf $(COLOR_GREEN)"\nCreating runtime container buildx.\n\n"$(COLOR_OFF)
 	$(OUTPUT)docker buildx create --name buildx
 	$(OUTPUT)docker buildx use buildx
-	$(OUTPUT)./build/buildx.sh \
+	$(OUTPUT)./.docker/.build/buildx.sh \
 		$(USER_ID) \
 		$(GROUP_ID) \
 		$(DOCKER_CONTAINER) \
