@@ -1,6 +1,7 @@
-CREATE DATABASE IF NOT EXISTS database_one;
-CREATE DATABASE IF NOT EXISTS database_one_test;
+CREATE DATABASE IF NOT EXISTS database_one CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS database_one_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE IF NOT EXISTS database_grafana;
+CREATE DATABASE IF NOT EXISTS database_metabase;
 CREATE DATABASE IF NOT EXISTS database_bitwarden;
 
 CREATE USER IF NOT EXISTS 'admin'@'%' IDENTIFIED WITH caching_sha2_password BY 'test123';
