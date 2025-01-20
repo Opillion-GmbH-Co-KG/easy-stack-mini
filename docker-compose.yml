@@ -221,8 +221,8 @@ services:
       - default
 
 
-  postgres-admin:
-    hostname: postgres-admin
+  pgadmin:
+    hostname: pgadmin
     build:
       context: .docker/${DOCKER_IMAGE_SOURCE}/
       dockerfile: postgres.admin.Dockerfile
@@ -242,7 +242,7 @@ services:
       PGADMIN_LISTEN_ADDRESS: ${PGADMIN_LISTEN_ADDRESS}
       PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${PGADMIN_INTERNAL_PORT} || exit 1"]
+      test: ["CMD", "wget", "-O", "-", "http://pgadmin:${PGADMIN_INTERNAL_PORT}/misc/ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -304,7 +304,7 @@ services:
       - ./.docker/dev/bitwarden/data:/bwdata
       - ./.docker/dev/bitwarden/Makefile:/Makefile:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "${HTTP_LOCALHOST}:${BITWARDEN_INTERNAL_PORT}"]
+      test: ["CMD", "curl", "-f", "bitwarden:${BITWARDEN_INTERNAL_PORT}"]
       interval: 16s
       timeout: 10s
       retries: 10
