@@ -162,7 +162,7 @@ services:
     container_name: "postgres"
     hostname: postgres
     ports:
-      - "${POSTGRESS_EXTERNAL_PORT}:${POSTGRESS_INTERNAL_PORT}" # "5432:5432"
+      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_INTERNAL_PORT}" # "5432:5432"
     volumes:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres-data:/var/lib/postgresql/data

@@ -1,2 +1,2 @@
-CREATE DATABASE IF NOT EXISTS postgress_one;
+CREATE DATABASE IF NOT EXISTS postgres_one;
 
