@@ -183,6 +183,7 @@ services:
     networks:
       - default
 
+
   postgres:
     hostname: postgres
     build:
@@ -207,9 +208,15 @@ services:
       POSTGRES_USER_PASSWORD: ${POSTGRES_USER_PASSWORD}
       SERVICE_NAME: ${SERVICE_NAME}
       POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     networks:
       - default
+
 
   postgres-admin:
     hostname: postgres-admin
@@ -229,6 +236,12 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_LISTEN_ADDRESS: ${PGADMIN_LISTEN_ADDRESS}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${PGADMIN_INTERNAL_PORT} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     networks:
       - default
@@ -246,6 +259,7 @@ services:
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
     environment:
       DATABASE_URL: "mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${MYSQL_INTERNAL_PORT}/${DATABASE_BITWARDEN}"
+      ROCKET_ADDRESS: ${ROCKET_ADDRESS}
       ROCKET_PORT: ${BITWARDEN_INTERNAL_PORT}
       HTTP_LOCALHOST: ${HTTP_LOCALHOST}
       I_REALLY_WANT_VOLATILE_STORAGE: ${BITWARDEN_I_REALLY_WANT_VOLATILE_STORAGE}
@@ -323,6 +337,7 @@ services:
       start_period: 30s
     networks:
       - default
+
 
   oracle:
     hostname: oracle
