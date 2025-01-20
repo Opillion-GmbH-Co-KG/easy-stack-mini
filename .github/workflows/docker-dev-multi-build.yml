@@ -22,7 +22,7 @@ on:
       containers:
         description: 'Containers you want to build'
         required: true
-        default: 'alpine,maria,mysql,redis,elasticsearch,postgres,postgres.admin,minio'
+        default: 'alpine,maria,mysql,redis,elasticsearch,postgres,postgres.admin,minio,mssql,oracle,bitwarden'
       platforms:
         description: 'Platforms you want to build your containers for'
         required: true

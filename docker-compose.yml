@@ -213,6 +213,126 @@ services:
       - default
 
 
+  bitwarden:
+    hostname: bitwarden
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: bitwarden.Dockerfile
+      args:
+        DOCKER_REPO: ${DOCKER_REPO}
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    environment:
+      DATABASE_URL: "mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${MYSQL_INTERNAL_PORT}/${DATABASE_BITWARDEN}"
+      ROCKET_PORT: ${BITWARDEN_INTERNAL_PORT}
+      HTTP_LOCALHOST: ${HTTP_LOCALHOST}
+      I_REALLY_WANT_VOLATILE_STORAGE: ${BITWARDEN_I_REALLY_WANT_VOLATILE_STORAGE}
+      WEBSOCKET_ENABLED: ${BITWARDEN_WEBSOCKET_ENABLED}
+      SHOW_PASSWORD_HINT: ${BITWARDEN_SHOW_PASSWORD_HINT}
+      ADMIN_TOKEN: ${BITWARDEN_ADMIN_TOKEN}
+      BW_CLIENTID: ${BITWARDEN_CLIENTID}
+      BW_CLIENTSECRET: ${BITWARDEN_CLIENTSECRET}
+      BITWARDEN_USER: ${BITWARDEN_USER}
+      BITWARDEN_PW: ${BITWARDEN_PW}
+      LOG_LEVEL: debug
+      # Mail Handling
+      # SMTP_HOST: ${BITWARDEN_SMTP_HOST}
+      # SMTP_FROM: ${BITWARDEN_SMTP_FROM}
+      # SMTP_FROM_NAME: ${BITWARDEN_SMTP_FROM_NAME}
+      # SMTP_SECURITY: ${BITWARDEN_SMTP_SECURITY}
+      # SMTP_PORT: ${BITWARDEN_SMTP_PORT}
+      # SMTP_USERNAME: ${BITWARDEN_SMTP_USERNAME}
+      # SMTP_PASSWORD: ${BITWARDEN_SMTP_PASSWORD}
+      # SMTP_TIMEOUT: ${BITWARDEN_SMTP_TIMEOUT}
+      # SMTP_AUTH_MECHANISM: ${BITWARDEN_SMTP_AUTH_MECHANISM}
+      # LOGIN_RATELIMIT_MAX_BURST: ${BITWARDEN_LOGIN_RATELIMIT_MAX_BURST}
+      # LOGIN_RATELIMIT_SECONDS: ${BITWARDEN_LOGIN_RATELIMIT_SECONDS}
+      # DOMAIN: ${BITWARDEN_DOMAIN}
+      # INVITATION_ORG_NAME: ${BITWARDEN_INVITATION_ORG_NAME}
+      # INVITATIONS_ALLOWED: ${BITWARDEN_INVITATIONS_ALLOWED}
+      # SIGNUPS_ALLOWED: ${BITWARDEN_SIGNUPS_ALLOWED}
+      # SIGNUPS_DOMAINS_WHITELIST: ${BITWARDEN_SIGNUPS_DOMAINS_WHITELIST}
+      # SIGNUPS_VERIFY: ${BITWARDEN_SIGNUPS_VERIFY}
+      # SIGNUPS_VERIFY_RESEND_TIME: ${BITWARDEN_SIGNUPS_VERIFY_RESEND_TIME}
+      # SIGNUPS_VERIFY_RESEND_LIMIT: ${BITWARDEN_SIGNUPS_VERIFY_RESEND_LIMIT}
+      # EMERGENCY_ACCESS_ALLOWED: ${BITWARDEN_EMERGENCY_ACCESS_ALLOWED}
+      # SENDS_ALLOWED: ${BITWARDEN_SENDS_ALLOWED}
+      # WEB_VAULT_ENABLED: ${BITWARDEN_WEB_VAULT_ENABLED}
+    restart: unless-stopped
+    ports:
+      - "${BITWARDEN_EXTERNAL_PORT}:${BITWARDEN_INTERNAL_PORT}" # "8084:86"
+    volumes:
+      - ./.docker/dev/bitwarden/data:/bwdata
+      - ./.docker/dev/bitwarden/Makefile:/Makefile:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "${HTTP_LOCALHOST}:${BITWARDEN_INTERNAL_PORT}"]
+      interval: 16s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - default
+
+  mssql:
+    hostname: mssql
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: mssql.Dockerfile
+      args:
+        DOCKER_REPO: ${DOCKER_REPO}
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${MSSQL_EXTERNAL_PORT}:${MSSQL_INTERNAL_PORT}" # "1433:1433"
+    environment:
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      SA_PASSWORD: ${SA_PASSWORD}
+    volumes:
+      - ./.docker/dev/mssql/scripts:/usr/scripts
+      - mssql_data:/var/opt/mssql
+    command: ["bash", "/usr/sbin/configure-db.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep sqlservr | grep -v grep"]
+      interval: 16s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - default
+
+  oracle:
+    hostname: oracle
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: oracle.Dockerfile
+      args:
+        DOCKER_REPO: ${DOCKER_REPO}
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    ports:
+      - "${ORACLE_EXTERNAL_PORT}:${ORACLE__INTERNAL_PORT}"
+    environment:
+      HOSTNAME: oracle
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      APP_USER: ${APP_USER}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD}
+    volumes:
+      - ./.docker/dev/oracle:/container-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 16s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - default
+
+
+
 networks:
   default:
     name: ${DOCKER_NETWORK}
