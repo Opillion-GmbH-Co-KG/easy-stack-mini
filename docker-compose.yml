@@ -11,6 +11,175 @@ services:
     networks:
       - default
 
+  mysql:
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: mysql.Dockerfile
+      args:
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_EXTERNAL_PORT}:${MYSQL_INTERNAL_PORT}" # "33065:3305"
+    command: >
+      --init-file /etc/mysql/init-raw.sql && \
+      mysqld --user=${DATABASE_USER}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_TEST_NAME: ${DATABASE_TEST_NAME}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_TCP_PORT: ${MYSQL_TCP_PORT}
+    healthcheck:
+      test: "mysql -uroot -p$MYSQL_ROOT_PASSWORD ${DATABASE_NAME} -e 'select 1'"
+      interval: 6s
+      timeout: 10s
+      retries: 10
+      start_period: 11s
+    networks:
+      - default
+
+  maria:
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: maria.Dockerfile
+      args:
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    ports:
+      - "${MARIA_EXTERNAL_PORT}:${MARIA_INTERNAL_PORT}"  # "33067:3306"
+    restart: unless-stopped
+    stop_grace_period: 5s
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    command: >
+      --init-file /etc/mariadb/init.sql && \
+      --innodb-buffer-pool-size=512M --transaction-isolation=READ-COMMITTED \
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci \
+      --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
+    environment:
+      MARIADB_AUTO_UPGRADE: ${MARIADB_AUTO_UPGRADE}
+      MARIADB_INITDB_SKIP_TZINFO: ${MARIADB_INITDB_SKIP_TZINFO}
+      MARIADB_TCP_PORT: ${MARIADB_TCP_PORT}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${DATABASE_MARIA_USER}
+      MARIADB_PASSWORD: ${DATABASE_MARIA_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DATABASE_MARIA_PASSWORD}
+    volumes:
+      - ./.docker/dev/maria/database:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      interval: 16s
+      timeout: 10s
+      retries: 3
+      start_period: 11s
+    networks:
+      - default
+
+
+  redis:
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: redis.Dockerfile
+      args:
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_USERNAME: ${REDIS_USERNAME}
+    expose:
+      - "${REDIS_INTERNAL_PORT}" #"6379"
+      - "${REDIS_INTERNAL_TWO_PORT}" #"9121"
+    volumes:
+      - redis-data:/data
+    command: /bin/sh -cx "echo 'requirepass $REDIS_PASSWORD' | redis-server /usr/local/etc/redis/redis.conf --requirepass root"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "-c", "ping"]
+      interval: 16s
+      timeout: 10s
+      retries: 3
+      start_period: 11s
+    networks:
+      - default
+
+
+  minio:
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: minio.Dockerfile
+      args:
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    ports:
+      - "${MINIO_EXTERNAL_PORT_ONE}:${MINIO_INTERNAL_PORT_ONE}" # "9006:9006"
+      - "${MINIO_EXTERNAL_PORT_TWO}:${MINIO_INTERNAL_PORT_TWO}" # "9007:9007"
+    volumes:
+      - 'minio-data:/bitnami/minio/data'
+      #- ./.docker/dev/minio/data:/bitnami/minio/data
+    command: ["/bin/sh", "-c", "/usr/bin/create-access-key.sh & /opt/bitnami/scripts/minio/run.sh"]
+    environment:
+      MINIO_SERVER_URL: ${MINIO_HOST_URL}
+      MINIO_HOST_URL: ${MINIO_HOST_URL}
+      MINIO_SERVER_URL_ONE: ${MINIO_SERVER_URL_ONE}
+      MINIO_SERVER_URL_TWO: ${MINIO_SERVER_URL_TWO}
+      BITNAMI_DEBUG: true
+      MINIO_API_PORT_NUMBER: ${MINIO_INTERNAL_PORT_ONE}
+      MINIO_CONSOLE_PORT_NUMBER: ${MINIO_INTERNAL_PORT_TWO}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_DATA_DIR: ${MINIO_DATA_DIR}
+      MINIO_DEFAULT_BUCKETS: ${MINIO_DEFAULT_BUCKETS}
+      MINIO_SERVER_ACCESS_KEY: ${MINIO_SERVER_ACCESS_KEY}
+      MINIO_SERVER_SECRET_KEY: ${MINIO_SERVER_SECRET_KEY}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f ${MINIO_SERVER_URL_ONE}/minio/health/live || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - default
+
+  postgres:
+    build:
+      context: .docker/${DOCKER_IMAGE_SOURCE}/
+      dockerfile: postgres.Dockerfile
+      args:
+        BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
+        DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
+        PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    container_name: "postgres"
+    hostname: postgres
+    ports:
+      - "${POSTGRESS_EXTERNAL_PORT}:${POSTGRESS_INTERNAL_PORT}" # "5432:5432"
+    volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - PGDATA: ${PGDATA}
+      - POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER: ${POSTGRES_USER}
+      - POSTGRES_USER_ROOT_PASSWORD: ${POSTGRES_USER_ROOT_PASSWORD}
+      - POSTGRES_USER_PASSWORD: ${POSTGRES_USER_PASSWORD}
+      - SERVICE_NAME: ${SERVICE_NAME}
+      - POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES}
+      - POSTGRES_DB: ${POSTGRES_MULTIPLE_DATABASES}
+    restart: unless-stopped
+    networks:
+      - default
+
+
 networks:
   default:
     name: ${DOCKER_NETWORK}
