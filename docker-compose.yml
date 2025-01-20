@@ -46,9 +46,9 @@ services:
         BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
     ports:
       - "${MARIA_EXTERNAL_PORT}:${MARIA_INTERNAL_PORT}"  # "33067:3306"
-    restart: unless-stopped
     stop_grace_period: 5s
     security_opt:
       - seccomp:unconfined
@@ -91,6 +91,7 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_USERNAME: ${REDIS_USERNAME}
+    restart: unless-stopped
     expose:
       - "${REDIS_INTERNAL_PORT}" #"6379"
       - "${REDIS_INTERNAL_TWO_PORT}" #"9121"
@@ -117,6 +118,7 @@ services:
         BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
     ports:
       - "${ELASTIC_EXTERNAL_PORT}:${ELASTIC_INTERNAL_PORT}" # "9200:9200"
     environment:
@@ -152,6 +154,7 @@ services:
         BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
     ports:
       - "${MINIO_EXTERNAL_PORT_ONE}:${MINIO_INTERNAL_PORT_ONE}" # "9006:9006"
       - "${MINIO_EXTERNAL_PORT_TWO}:${MINIO_INTERNAL_PORT_TWO}" # "9007:9007"
@@ -194,6 +197,7 @@ services:
         BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
     ports:
       - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_INTERNAL_PORT}" # "5432:5432"
     volumes:
@@ -213,7 +217,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
     networks:
       - default
 
@@ -228,6 +231,7 @@ services:
         BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
     ports:
       - "${PGADMIN_EXTERNAL_PORT}:${PGADMIN_INTERNAL_PORT}" # "8081:8081"
     volumes:
@@ -242,7 +246,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
     networks:
       - default
 
@@ -257,6 +260,9 @@ services:
         BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${BITWARDEN_EXTERNAL_PORT}:${BITWARDEN_INTERNAL_PORT}" # "8084:86"
     environment:
       DATABASE_URL: "mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${MYSQL_INTERNAL_PORT}/${DATABASE_BITWARDEN}"
       ROCKET_ADDRESS: ${ROCKET_ADDRESS}
@@ -294,9 +300,6 @@ services:
       # EMERGENCY_ACCESS_ALLOWED: ${BITWARDEN_EMERGENCY_ACCESS_ALLOWED}
       # SENDS_ALLOWED: ${BITWARDEN_SENDS_ALLOWED}
       # WEB_VAULT_ENABLED: ${BITWARDEN_WEB_VAULT_ENABLED}
-    restart: unless-stopped
-    ports:
-      - "${BITWARDEN_EXTERNAL_PORT}:${BITWARDEN_INTERNAL_PORT}" # "8084:86"
     volumes:
       - ./.docker/dev/bitwarden/data:/bwdata
       - ./.docker/dev/bitwarden/Makefile:/Makefile:ro
