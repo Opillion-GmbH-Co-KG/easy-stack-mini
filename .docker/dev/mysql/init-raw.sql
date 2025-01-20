@@ -1,5 +1,7 @@
 CREATE DATABASE IF NOT EXISTS database_one;
 CREATE DATABASE IF NOT EXISTS database_one_test;
+CREATE DATABASE IF NOT EXISTS database_grafana;
+CREATE DATABASE IF NOT EXISTS database_bitwarden;
 
 CREATE USER IF NOT EXISTS 'admin'@'%' IDENTIFIED WITH caching_sha2_password BY 'test123';
 GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' WITH GRANT OPTION;
