@@ -24,7 +24,7 @@ services:
       REDIS_DATABASE_NAME: ${REDIS_DATABASE_NAME}
       REDIS_DATABASE_TEST_NAME: ${REDIS_DATABASE_TEST_NAME}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://python:5000/healthz"]
+      test: ["CMD", "curl", "-f", "http://python:${PYTHON_INTERNAL_PORT}/healthz"]
       interval: 30s
       timeout: 10s
       retries: 10

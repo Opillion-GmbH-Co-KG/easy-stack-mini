@@ -6,11 +6,11 @@ on:
       devImageTag:
         description: 'Dev image tag'
         required: true
-        default: 'easyStackMiniDev001'
+        default: 'easyStackMiniDev-PYTHON'
       prodImageTag:
         description: 'Prod image tag'
         required: true
-        default: 'easyStackMiniProd001'
+        default: 'easyStackMiniProd-PYTHON'
       baseImageTag:
         description: 'Tag for the base image'
         required: true
@@ -22,7 +22,7 @@ on:
       containers:
         description: 'Containers you want to build'
         required: true
-        default: 'alpine'
+        default: 'python'
       platforms:
         description: 'Platforms you want to build your containers for'
         required: true
