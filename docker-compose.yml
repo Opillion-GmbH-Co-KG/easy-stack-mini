@@ -12,9 +12,9 @@ services:
         DEV_IMAGE_TAG: ${DEV_IMAGE_TAG}
         PROD_IMAGE_TAG: ${PROD_IMAGE_TAG}
     ports:
-      - "8000:5000"
+      - "${PYTHON_EXTERNAL_PORT}:${PYTHON_INTERNAL_PORT}"  # 8000:5000
     volumes:
-      - ./docker/dev/python/app:/var/www
+      - ./python/app:/var/www
     environment:
       REDIS_INTERNAL_PORT: ${REDIS_INTERNAL_PORT}
       REDIS_INTERNAL_TWO_PORT: ${REDIS_INTERNAL_TWO_PORT}
@@ -24,7 +24,7 @@ services:
       REDIS_DATABASE_NAME: ${REDIS_DATABASE_NAME}
       REDIS_DATABASE_TEST_NAME: ${REDIS_DATABASE_TEST_NAME}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/healthz"]
+      test: ["CMD", "curl", "-f", "http://python:5000/healthz"]
       interval: 30s
       timeout: 10s
       retries: 10
