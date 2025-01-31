@@ -1,3 +1,4 @@
 FROM python:alpine3.21
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+# chmod +x ./python/app/app.py
+CMD ["python", "/var/www/app.py"]
