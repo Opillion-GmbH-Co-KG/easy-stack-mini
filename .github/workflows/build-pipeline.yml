@@ -16,24 +16,22 @@ jobs:
 
       - name: Load environment variables
         run: |
-          if [ -f .env.dist ]; then
-            echo "Loading .env.dist..."
-            export $(grep -v '^#' .env.dist | xargs)
-          fi
-          if [ -f .env ]; then
-            echo "Loading .env..."
-            export $(grep -v '^#' .env | xargs)
-          fi
-
+          for file in .env.dist .env; do
+            if [ -f "$file" ]; then
+              echo "Loading $file..."
+              while IFS= read -r line; do
+                [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+                key="${line%%=*}"
+                value="${line#*=}"
+                echo "Exporting: $key"
+                export "$key=$value"
+                echo "$key=$value" >> $GITHUB_ENV
+              done < "$file"
+            fi
+          done
+          
           echo "Loaded environment variables:"
           env | grep -E 'DOCKER_CONTAINER|BASE_IMAGE_TAG|DEV_IMAGE_TAG|PROD_IMAGE_TAG|PLATFORMS'
-
-          echo "DOCKER_CONTAINER=${DOCKER_CONTAINER:-alpine}" >> $GITHUB_ENV
-          echo "BASE_IMAGE_TAG=${BASE_IMAGE_TAG:-latest}" >> $GITHUB_ENV
-          echo "DEV_IMAGE_TAG=${DEV_IMAGE_TAG:-latest}" >> $GITHUB_ENV
-          echo "PROD_IMAGE_TAG=${PROD_IMAGE_TAG:-latest}" >> $GITHUB_ENV
-          echo "DOCKER_IMAGE_SOURCE=all" >> $GITHUB_ENV
-          echo "PLATFORMS=${PLATFORMS:-linux/amd64,linux/arm64}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
