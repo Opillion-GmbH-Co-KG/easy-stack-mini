@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-name: Fast Build
-=======
-name: Docker Multi-Build and Push
->>>>>>> refs/heads/main
+name: Docker Container Build
 
 on:
   workflow_dispatch:
@@ -19,7 +15,7 @@ jobs:
         uses: xom9ikk/dotenv@v2.3.0
         with:
           path: .env.dist
-          mode: development
+          mode: dist
           load-mode: strict
 
       - name: Set up Docker Buildx
