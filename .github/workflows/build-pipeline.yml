@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 name: Fast Build
+=======
+name: Docker Multi-Build and Push
+>>>>>>> refs/heads/main
 
 on:
   workflow_dispatch:
