@@ -1,0 +1,71 @@
+name: Docker Multi-Build and Push
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load .env file
+        uses: xom9ikk/dotenv@v2.3.0
+        with:
+          path: .env.dist
+          mode: development
+          load-mode: strict
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_REPO_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      - name: Build and push docker images
+        run: |
+          IFS=',' read -r -a containers <<< "$DOCKER_CONTAINER"
+          USER_ID="1000"
+          GROUP_ID="1001"
+          DOCKER_REPO_USER="${{ secrets.DOCKER_REPO_USER }}"
+          DOCKER_PASS="${{ secrets.DOCKER_PASS }}"
+          DEV_IMAGE_TAG="$DEV_IMAGE_TAG"
+          PROD_IMAGE_TAG="$PROD_IMAGE_TAG"
+          BASE_IMAGE_TAG="$BASE_IMAGE_TAG"
+          DOCKER_USER="docker"
+          PLATFORMS="$PLATFORMS"
+          CONTAINER_NAME_ID="$DOCKER_REPO_USER-image"
+
+          BUILD_IMAGES() {
+            local source=$1
+            local tag=$2
+            for container in "${containers[@]}"; do
+              echo "Building container: $container (Source: $source, Tag: $tag)"
+              docker buildx build \
+              --platform $PLATFORMS \
+              -t $DOCKER_REPO_USER/$container:$tag \
+              --build-arg DOCKER_USER=$DOCKER_USER \
+              --build-arg USER_ID=$USER_ID \
+              --build-arg GROUP_ID=$GROUP_ID \
+              --build-arg BASE_IMAGE_TAG=$BASE_IMAGE_TAG \
+              --build-arg DEV_IMAGE_TAG=$DEV_IMAGE_TAG \
+              --build-arg PROD_IMAGE_TAG=$PROD_IMAGE_TAG \
+              -f .docker/$source/$container.Dockerfile \
+              --push .
+              echo "Build done for: $container"
+            done
+          }
+
+          echo "Building base images"
+          BUILD_IMAGES base $BASE_IMAGE_TAG
+          echo "Building dev images"
+          BUILD_IMAGES dev $DEV_IMAGE_TAG
+          echo "Building prod images"
+          BUILD_IMAGES prod $PROD_IMAGE_TAG
+
+          echo "All Containers built, tagged, and pushed to $DOCKER_REPO_USER!"
