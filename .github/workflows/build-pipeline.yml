@@ -57,23 +57,22 @@ jobs:
           BUILD_IMAGES() {
             local source=$1
             local tag=$2
-
             for container in "${containers[@]}"; do
               echo "Building container: $container (Source: $source, Tag: $tag)"
-          
               docker buildx build \
-                --platform "$PLATFORMS" \
-                -t "$DOCKER_REPO_USER/$container:$tag" \
-                --build-arg DOCKER_USER="$DOCKER_USER" \
-                --build-arg USER_ID="$USER_ID" \
-                --build-arg GROUP_ID="$GROUP_ID" \
-                -f ".docker/$source/$container.Dockerfile" \
-                --push .
-          
-              echo "✅ Build completed for: $container"
+              --platform $PLATFORMS \
+              -t $DOCKER_REPO_USER/$container:$tag \
+              --build-arg DOCKER_USER=$DOCKER_USER \
+              --build-arg USER_ID=$USER_ID \
+              --build-arg GROUP_ID=$GROUP_ID \
+              --build-arg BASE_IMAGE_TAG=$BASE_IMAGE_TAG \
+              --build-arg DEV_IMAGE_TAG=$DEV_IMAGE_TAG \
+              --build-arg PROD_IMAGE_TAG=$PROD_IMAGE_TAG \
+              -f .docker/$source/$container.Dockerfile \
+              --push .
+              echo "Build done for: $container"
             done
           }
-
           echo "🔄 Building all image types..."
           BUILD_IMAGES base "${{ env.BASE_IMAGE_TAG }}"
           BUILD_IMAGES dev "${{ env.DEV_IMAGE_TAG }}"
