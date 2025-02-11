@@ -15,10 +15,14 @@ jobs:
         run: |
           ls -sla
 
-      - name: Load .env file
-        uses: xom9ikk/dotenv@v2.3.0
-        with:
-          path: .env.dist
+      - name: Load environment variables
+        run: |
+          if [ -f .env.dist ]; then
+            export $(grep -v '^#' .env.dist | xargs)
+          fi
+          if [ -f .env ]; then
+            export $(grep -v '^#' .env | xargs)
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
