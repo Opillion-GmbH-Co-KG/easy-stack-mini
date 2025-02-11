@@ -1,8 +1,6 @@
 # EASY STACK MINI
 ## A lightweight Stack for fast local development: using Docker, Docker Compose, and Makefile.
 
-![Alt text](.makefile/assets/easy-stack-mini.jpg?raw=true" "Easy Stack Mini - DALL-E Image")
-
 ## Introduction
 This application is a versatile and comprehensive solution that provides a framework for various Docker containers. It can include different types of services, such as backends in Java or PHP, any kind of frontend, or even a complete Docker stack. Modify it to suit your needs. Check out our upcoming Easy-Stacks soon.
 With this simple stack, you can build your own Docker images and publish them either locally or through GitHub pipelines. For your own Docker containers, you will need a registry such as Docker Hub or a similar option, like GitHub's container registry.
@@ -107,3 +105,5 @@ By default, the stack consists of a single Docker container. However, you can ea
 |----------------|------------------------------------------|------------------------------------------------------------------|
 | **Easy-Stack** | GPL-3.0                                  | [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)             |
 
+
+![Alt text](.makefile/assets/easy-stack-mini.jpg?raw=true" "Easy Stack Mini - DALL-E Image")
