@@ -74,20 +74,6 @@ restart-callback: \
 build-%-callback:
 	$(call buildx-build, $*)
 
-docker-pull-images: \
-	docker-login
-	$(OUTPUT)printf $(COLOR_BLUE)"\nPulling all images from DOCKER_CONTAINER: $(DOCKER_CONTAINER)\n"$(COLOR_OFF)
-	@for container in $(shell echo $(DOCKER_CONTAINER) | tr ',' ' '); do \
-		printf $(COLOR_GREEN)"Pulling image: $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG)...\n"$(COLOR_OFF); \
-		if docker pull $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG); then \
-			printf $(COLOR_GREEN)"Successfully pulled: $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG)\n"$(COLOR_OFF); \
-		else \
-			printf $(COLOR_RED)"Failed to pull: $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG)\n"$(COLOR_OFF); \
-		fi; \
-	done
-	$(OUTPUT)printf $(COLOR_GREEN)"\nAll images processed.\n"$(COLOR_OFF)
-
-
 logo-callback:
 	APP_NAME=$(APP_NAME)
 	$(OUTPUT)printf $(COLOR_BLUE)

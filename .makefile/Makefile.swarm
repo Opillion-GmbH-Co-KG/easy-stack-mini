@@ -1,5 +1,5 @@
 .PHONY: \
-  images-pull \
+  logo \
   kill-docker-proxy \
   list-nodes \
   list-stacks \
@@ -12,12 +12,10 @@
   swarm-secrets \
   swarm-services \
   swarm-show \
-  push-images \
-  proxy \
-  deploy \
   swarm-stop \
-  crass-login \
-  docker-io-login
+  docker-pull-images \
+  create-secrets
+
 
 logo:
 	$(call measure_time, list-nodes)
@@ -31,6 +29,8 @@ list-nodes:
 list-stacks:
 	$(OUTPUT)docker stack ls
 
+create-secrets:
+	$(OUTPUT).docker/.build/create-secrets.sh
 
 swarm: \
 	swarm-stop
@@ -108,3 +108,15 @@ swarm-stop:
 	@printf "\n"$(COLOR_GREEN)"Docker Swarm Stack '$(APP_NAME)' successfully stopped.\n"$(COLOR_OFF)
 	$(OUTPUT)make swarm-clean-secrets
 
+docker-pull-images:
+	$(OUTPUT)echo ${DOCKER_PASS} | docker login -u ${DOCKER_REPO_USER} --password-stdin
+	$(OUTPUT)printf $(COLOR_BLUE)"\nPulling all images from DOCKER_CONTAINER: $(DOCKER_CONTAINER)\n"$(COLOR_OFF)
+	@for container in $(shell echo $(DOCKER_CONTAINER) | tr ',' ' '); do \
+		printf $(COLOR_GREEN)"Pulling image: $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG)...\n"$(COLOR_OFF); \
+		if docker pull $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG); then \
+			printf $(COLOR_GREEN)"Successfully pulled: $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG)\n"$(COLOR_OFF); \
+		else \
+			printf $(COLOR_RED)"Failed to pull: $(DOCKER_REPO_NAME)/$$container:$(PROD_IMAGE_TAG)\n"$(COLOR_OFF); \
+		fi; \
+	done
+	$(OUTPUT)printf $(COLOR_GREEN)"\nAll images processed.\n"$(COLOR_OFF)
