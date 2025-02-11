@@ -100,4 +100,4 @@ jobs:
             BUILD_IMAGES $DOCKER_IMAGE_SOURCE $BUILD_IMAGE_TAG
           fi
 
-          echo "All Containers built, tagged, and pushed to $DOCKER_REPO_USER!"
+          echo "🚀 All Containers built, tagged, and pushed to $DOCKER_REPO_USER!"
