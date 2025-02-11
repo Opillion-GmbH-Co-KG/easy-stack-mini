@@ -11,9 +11,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: check path
-        run: |
-          ls -sla
+      - name: Check path
+        run: ls -sla
 
       - name: Load environment variables
         run: |
@@ -25,16 +24,16 @@ jobs:
             echo "Loading .env..."
             export $(grep -v '^#' .env | xargs)
           fi
-          echo "Loaded environment variables:"
-          env | grep -E 'DOCKER_CONTAINER|BASE_IMAGE_TAG|DEV_IMAGE_TAG|PROD_IMAGE_TAG|DOCKER_IMAGE_SOURCE|PLATFORMS|DOCKER_NETWORK'
-          
-          echo "DOCKER_CONTAINER=\"$DOCKER_CONTAINER\"" >> $GITHUB_ENV
-          echo "BASE_IMAGE_TAG=\"$BASE_IMAGE_TAG\"" >> $GITHUB_ENV
-          echo "DEV_IMAGE_TAG=\"$DEV_IMAGE_TAG\"" >> $GITHUB_ENV
-          echo "PROD_IMAGE_TAG=\"$PROD_IMAGE_TAG\"" >> $GITHUB_ENV
-          echo "DOCKER_IMAGE_SOURCE=\"$DOCKER_IMAGE_SOURCE\"" >> $GITHUB_ENV
-          echo "PLATFORMS=\"$PLATFORMS\"" >> $GITHUB_ENV
 
+          echo "Loaded environment variables:"
+          env | grep -E 'DOCKER_CONTAINER|BASE_IMAGE_TAG|DEV_IMAGE_TAG|PROD_IMAGE_TAG|PLATFORMS'
+
+          echo "DOCKER_CONTAINER=${DOCKER_CONTAINER:-alpine}" >> $GITHUB_ENV
+          echo "BASE_IMAGE_TAG=${BASE_IMAGE_TAG:-latest}" >> $GITHUB_ENV
+          echo "DEV_IMAGE_TAG=${DEV_IMAGE_TAG:-latest}" >> $GITHUB_ENV
+          echo "PROD_IMAGE_TAG=${PROD_IMAGE_TAG:-latest}" >> $GITHUB_ENV
+          echo "DOCKER_IMAGE_SOURCE=all" >> $GITHUB_ENV
+          echo "PLATFORMS=${PLATFORMS:-linux/amd64,linux/arm64}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -45,62 +44,39 @@ jobs:
           username: ${{ secrets.DOCKER_REPO_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-
-      - name: Build and push docker images
+      - name: Build and push Docker images
         run: |
-          
-          
           IFS=',' read -r -a containers <<< "${{ env.DOCKER_CONTAINER }}"
+          
           USER_ID="1000"
           GROUP_ID="1001"
           DOCKER_USER="docker"
-          CONTAINER_NAME_ID="$DOCKER_REPO_USER-image"
           DOCKER_REPO_USER="${{ secrets.DOCKER_REPO_USER }}"
-          DOCKER_PASS="${{ secrets.DOCKER_PASS }}"
-          DEV_IMAGE_TAG="${{ env.DEV_IMAGE_TAG }}"
-          PROD_IMAGE_TAG="${{ env.PROD_IMAGE_TAG }}"
-          BASE_IMAGE_TAG="${{ env.BASE_IMAGE_TAG }}"
           PLATFORMS="${{ env.PLATFORMS }}"
-          DOCKER_IMAGE_SOURCE="${{ env.DOCKER_IMAGE_SOURCE }}"
-          
+
           BUILD_IMAGES() {
             local source=$1
             local tag=$2
+
             for container in "${containers[@]}"; do
               echo "Building container: $container (Source: $source, Tag: $tag)"
+          
               docker buildx build \
-              --platform $PLATFORMS \
-              -t $DOCKER_REPO_USER/$container:$tag \
-              --build-arg DOCKER_USER=$DOCKER_USER \
-              --build-arg USER_ID=$USER_ID \
-              --build-arg GROUP_ID=$GROUP_ID \
-              --build-arg BASE_IMAGE_TAG=$BASE_IMAGE_TAG \
-              --build-arg DEV_IMAGE_TAG=$DEV_IMAGE_TAG \
-              --build-arg PROD_IMAGE_TAG=$PROD_IMAGE_TAG \
-              -f .docker/$source/$container.Dockerfile \
-              --push .
-              echo "Build done for: $container"
+                --platform "$PLATFORMS" \
+                -t "$DOCKER_REPO_USER/$container:$tag" \
+                --build-arg DOCKER_USER="$DOCKER_USER" \
+                --build-arg USER_ID="$USER_ID" \
+                --build-arg GROUP_ID="$GROUP_ID" \
+                -f ".docker/$source/$container.Dockerfile" \
+                --push .
+          
+              echo "✅ Build completed for: $container"
             done
           }
-          
-          if [[ "$DOCKER_IMAGE_SOURCE" == "all" ]]; then
-            echo "Building base images"
-            BUILD_IMAGES base $BASE_IMAGE_TAG
-            echo "Building dev images"
-            BUILD_IMAGES dev $DEV_IMAGE_TAG
-            echo "Building prod images"
-            BUILD_IMAGES prod $PROD_IMAGE_TAG
-          else
-            BUILD_IMAGE_TAG=""
-            if [[ "$DOCKER_IMAGE_SOURCE" == "base" ]]; then
-              BUILD_IMAGE_TAG=$BASE_IMAGE_TAG
-            elif [[ "$DOCKER_IMAGE_SOURCE" == "dev" ]]; then
-              BUILD_IMAGE_TAG=$DEV_IMAGE_TAG
-            elif [[ "$DOCKER_IMAGE_SOURCE" == "prod" ]]; then
-              BUILD_IMAGE_TAG=$PROD_IMAGE_TAG
-            fi
-          
-            BUILD_IMAGES $DOCKER_IMAGE_SOURCE $BUILD_IMAGE_TAG
-          fi
-          
-          echo "All Containers built, tagged, and pushed to $DOCKER_REPO_USER!"
+
+          echo "🔄 Building all image types..."
+          BUILD_IMAGES base "${{ env.BASE_IMAGE_TAG }}"
+          BUILD_IMAGES dev "${{ env.DEV_IMAGE_TAG }}"
+          BUILD_IMAGES prod "${{ env.PROD_IMAGE_TAG }}"
+
+          echo "🚀 Alle Container wurden erfolgreich gebaut, getaggt und gepusht!"
