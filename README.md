@@ -59,7 +59,7 @@ make restart
 
 #### The stack up and running:
 
-![Alt text](.makefile/assets/console.png?raw=true" "Console view")
+![Alt text](.makefile/assets/stack.png?raw=true" "Console view")
 
 ## More Information
 
