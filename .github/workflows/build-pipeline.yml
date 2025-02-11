@@ -1,4 +1,4 @@
-name: Docker Multi-Build and Push
+name: Fast Build
 
 on:
   workflow_dispatch:
