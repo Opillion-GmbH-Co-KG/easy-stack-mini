@@ -18,8 +18,7 @@ jobs:
       - name: Load .env file
         uses: xom9ikk/dotenv@v2.3.0
         with:
-          path: /.env.dist
-          load-mode: strict
+          path: .env.dist
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
