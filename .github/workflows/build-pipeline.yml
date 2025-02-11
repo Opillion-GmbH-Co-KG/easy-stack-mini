@@ -1,4 +1,4 @@
-name: Build Docker Container
+name: Build (all) Docker Container
 
 on:
   workflow_dispatch:

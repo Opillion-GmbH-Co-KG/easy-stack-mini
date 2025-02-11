@@ -1,4 +1,4 @@
-name: Build Docker Container (Advanced)
+name: Build Docker Container (Advanced Mode)
 
 on:
   workflow_dispatch:
