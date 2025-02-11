@@ -1,13 +1,25 @@
 # EASY STACK MINI
 ## A lightweight Stack for fast local development: using Docker, Docker Compose, and Makefile.
 
-![Alt text](.makefile/assets/easy-stack-mini.jpg?raw=true" "Easy Stack Mini - DALL-E Image")
-
 ## Introduction
 This application is a versatile and comprehensive solution that provides a framework for various Docker containers. It can include different types of services, such as backends in Java or PHP, any kind of frontend, or even a complete Docker stack. Modify it to suit your needs. Check out our upcoming Easy-Stacks soon.
 With this simple stack, you can build your own Docker images and publish them either locally or through GitHub pipelines. For your own Docker containers, you will need a registry such as Docker Hub or a similar option, like GitHub's container registry.
 
-#### Caution! Caution! This stack is intended for development use only and is not configured for production. Please make sure to change all passwords immediately. You can override the values from the .env.dist file with a custom .env file. For production use, please refer to the "Easy-Stack-Prod" stack - comming soon.
+#### Caution! Caution! This stack is intended for development use only and is not configured for production. For production use, please refer to the "Easy-Stack-Prod" stack - comming soon.
+
+## Important Notice
+
+We strongly recommend changing all passwords in the `.env.dist` file. These are purely test data and should not be used even in development mode.
+
+### How to Update Environment Variables
+
+1. Create a `.env` file next to `.env.dist`:
+   ```sh
+   cp .env.dist .env
+   ```
+2. Open the `.env` file and update the relevant values.
+3. The `.env` file will be automatically loaded if it exists and will override the corresponding environment variables.
+
 
 ## Installation and Starting the Application
 To install and start the application, follow these steps:
@@ -64,5 +76,11 @@ By default, the stack consists of a single Docker container. However, you can ea
         - **NONE:**
     - **Name:** easy-stack-mini-alpine-1
 
+## License Information
+
+| Container      | License                                  | License Link                                                     |
+|----------------|------------------------------------------|------------------------------------------------------------------|
+| **Easy-Stack** | GPL-3.0                                  | [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)             |
 
 
+![Alt text](.makefile/assets/easy-stack-mini.jpg?raw=true" "Easy Stack Mini - DALL-E Image")
