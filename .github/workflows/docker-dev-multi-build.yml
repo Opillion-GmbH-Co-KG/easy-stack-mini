@@ -1,4 +1,4 @@
-name: Docker Multi-Build and Push
+name: Build Docker Container (Advanced)
 
 on:
   workflow_dispatch:
