@@ -15,7 +15,6 @@ jobs:
         uses: xom9ikk/dotenv@v2.3.0
         with:
           path: .env.dist
-          mode: development
           load-mode: strict
 
       - name: Set up Docker Buildx
