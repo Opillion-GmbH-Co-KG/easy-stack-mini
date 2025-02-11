@@ -40,7 +40,16 @@ jobs:
 
       - name: Build and push docker images
         run: |
+          echo "DOCKER_CONTAINER: $DOCKER_CONTAINER"
           IFS=',' read -r -a containers <<< "$DOCKER_CONTAINER"
+          
+          if [ ${#containers[@]} -eq 0 ]; then
+            echo "No containers found to build. Exiting!"
+            exit 1
+          fi
+          
+          echo "Containers to be built: ${containers[@]}"
+          
           USER_ID="1000"
           GROUP_ID="1001"
           DOCKER_REPO_USER="${{ secrets.DOCKER_REPO_USER }}"
@@ -51,12 +60,17 @@ jobs:
           DOCKER_USER="docker"
           PLATFORMS="$PLATFORMS"
           CONTAINER_NAME_ID="$DOCKER_REPO_USER-image"
-
+          
           BUILD_IMAGES() {
             local source=$1
             local tag=$2
             for container in "${containers[@]}"; do
               echo "Building container: $container (Source: $source, Tag: $tag)"
+              if [ ! -f ".docker/$source/$container.Dockerfile" ]; then
+                echo "ERROR: Dockerfile .docker/$source/$container.Dockerfile not found!"
+                continue
+              fi
+          
               docker buildx build \
               --platform $PLATFORMS \
               -t $DOCKER_REPO_USER/$container:$tag \
@@ -68,15 +82,16 @@ jobs:
               --build-arg PROD_IMAGE_TAG=$PROD_IMAGE_TAG \
               -f .docker/$source/$container.Dockerfile \
               --push .
+          
               echo "Build done for: $container"
             done
           }
-
+          
           echo "Building base images"
           BUILD_IMAGES base $BASE_IMAGE_TAG
           echo "Building dev images"
           BUILD_IMAGES dev $DEV_IMAGE_TAG
           echo "Building prod images"
           BUILD_IMAGES prod $PROD_IMAGE_TAG
-
+          
           echo "All Containers built, tagged, and pushed to $DOCKER_REPO_USER!"
