@@ -80,7 +80,7 @@ logo-callback:
 	$(OUTPUT)awk '{printf "%10s%s\n", "", $$0}' .makefile/assets/logo.asci
 	$(OUTPUT)printf $(COLOR_WHITE)
 	echo  '                                                             '
-	echo  "                          $$APP_NAME                         "
+	echo  "                            $$APP_NAME                       "
 	$(OUTPUT)printf $(COLOR_BLUE)
 	echo  '                                                             '
 	echo  '                Opillion GmbH & Co KG (GPL-3.0 2025)         '
