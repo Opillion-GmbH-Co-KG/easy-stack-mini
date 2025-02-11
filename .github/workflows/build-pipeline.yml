@@ -29,11 +29,13 @@ jobs:
 
       - name: Build and push docker images
         run: |
-          IFS=',' read -r -a containers <<< "$DOCKER_CONTAINER"
           USER_ID="1000"
           GROUP_ID="1001"
+          IFS=',' read -r -a containers <<< "$DOCKER_CONTAINER"
+          # docker secretes
           DOCKER_REPO_USER="${{ secrets.DOCKER_REPO_USER }}"
           DOCKER_PASS="${{ secrets.DOCKER_PASS }}"
+          # env vars
           DEV_IMAGE_TAG="$DEV_IMAGE_TAG"
           PROD_IMAGE_TAG="$PROD_IMAGE_TAG"
           BASE_IMAGE_TAG="$BASE_IMAGE_TAG"
