@@ -101,5 +101,9 @@ By default, the stack consists of a single Docker container. However, you can ea
         - **NONE:**
     - **Name:** easy-stack-mini-alpine-1
 
+## License Information
 
+| Container      | License                                  | License Link                                                     |
+|----------------|------------------------------------------|------------------------------------------------------------------|
+| **Easy-Stack** | GPL-3.0                                  | [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)             |
 
