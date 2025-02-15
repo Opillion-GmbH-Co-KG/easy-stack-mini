@@ -47,7 +47,7 @@ jobs:
           IFS=',' read -r -a containers <<< "${{ env.DOCKER_CONTAINER }}"
           
           USER_ID="1000"
-          GROUP_ID="1001"
+          GROUP_ID="1000"
           DOCKER_USER="docker"
           DOCKER_REPO_USER="${{ secrets.DOCKER_REPO_USER }}"
           PLATFORMS="${{ env.PLATFORMS }}"
